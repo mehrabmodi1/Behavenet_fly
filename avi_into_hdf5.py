@@ -23,21 +23,25 @@ def avi_into_hdf5(avi_path, hdf5_path):
         return[]
     
     container = av.open(avi_path)
-    #container.streams.video[0].thread_type = "AUTO"
+    
+    #container.streams.video[0].thread_type = "AUTO"  #Go faster!
     
     n_frames = container.streams.video[0].frames
-    packet_n = 0
-    for packet in container.demux():
-        print(packet_n)
-        packet_n += 1
+    #PICK UP THREAD HERE
+    #frame import working efficiently, write each frame to appropriate group in hdf5 file, figure out how to do it in chunks of frames (100?)
+    
+    frame_n = 0
+    for frame in container.decode(video = 0):
+        frame_n += 1
+        arr = frame.to_ndarray(format = 'rgb24')  # PIL/Pillow image
+        
+            
+            
+        if frame_n > 1:
+            print(f"framediff = {np.sum(arr - arr_old)}")
+        
+        arr_old = arr
         #pdb.set_trace()
-        for frame in packet.decode():
-            #if frame.type == 'video':
-            pdb.set_trace()                
-            img = frame.to_image()  # PIL/Pillow image
-            arr = np.asarray(img)  # numpy array
-            plt.imshow(np.squeeze(arr[:, :, 0]))
-            pdb.set_trace()
             
     if not os.path.exists(hdf5_path):
         do_stuff = 1
